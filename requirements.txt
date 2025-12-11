@@ -1,0 +1,9 @@
+# Langflow - Visual RAG Builder
+langflow>=1.0.0
+
+# HTTP client for API calls
+httpx>=0.26.0
+tqdm>=4.66.0
+
+# OpenSearch client
+opensearch-py>=2.4.0

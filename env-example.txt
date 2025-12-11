@@ -1,0 +1,20 @@
+# ===========================================
+# Environment Variables
+# ===========================================
+# Copy this file to .env and fill in your values
+
+# OpenAI API Key (required for embeddings)
+OPENAI_API_KEY=your-openai-api-key-here
+
+# Unstructured.io API Key (required for document parsing)
+UNSTRUCTURED_API_KEY=your-unstructured-api-key-here
+
+# IBM watsonx.ai (optional - if using watsonx as LLM)
+WATSONX_API_KEY=your-watsonx-api-key-here
+WATSONX_PROJECT_ID=your-project-id-here
+WATSONX_URL=https://us-south.ml.cloud.ibm.com
+
+# OpenSearch Configuration (defaults shown)
+OPENSEARCH_HOST=localhost
+OPENSEARCH_PORT=9200
+INDEX_NAME=langflow

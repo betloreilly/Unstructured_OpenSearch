@@ -17,4 +17,4 @@ WATSONX_URL=https://us-south.ml.cloud.ibm.com
 # OpenSearch Configuration (defaults shown)
 OPENSEARCH_HOST=localhost
 OPENSEARCH_PORT=9200
-INDEX_NAME=langflow
+INDEX_NAME=hybrid_demo

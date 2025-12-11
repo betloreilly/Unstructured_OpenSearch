@@ -89,7 +89,7 @@ export OPENAI_API_KEY="your-openai-api-key"
 OpenSearch 3.x requires pre-creating the index with the correct vector field configuration. Langflow defaults to a deprecated engine that won't work otherwise.
 
 ```bash
-curl -X PUT "http://localhost:9200/langflow" -H 'Content-Type: application/json' -d '
+curl -X PUT "http://localhost:9200/hybrid_demo" -H 'Content-Type: application/json' -d '
 {
   "settings": { "index": { "knn": true } },
   "mappings": {
@@ -365,7 +365,7 @@ Verify OpenSearch is working:
 ```bash
 curl http://localhost:9200
 curl http://localhost:9200/_cat/indices?v
-curl http://localhost:9200/langflow/_count
+curl http://localhost:9200/hybrid_demo/_count
 ```
 
 ---
@@ -376,23 +376,23 @@ Access Dev Tools at http://localhost:5601 and try these queries:
 
 ```
 # Browse documents
-GET langflow/_search
+GET hybrid_demo/_search
 {"size": 10, "_source": ["text", "metadata"], "query": {"match_all": {}}}
 
 # Text search
-GET langflow/_search
+GET hybrid_demo/_search
 {"query": {"match": {"text": "hybrid search"}}}
 
 # Check vectors exist
-GET langflow/_search
+GET hybrid_demo/_search
 {"size": 1, "_source": ["vector_field"], "query": {"exists": {"field": "vector_field"}}}
 
 # Delete all documents (keeps index)
-POST langflow/_delete_by_query
+POST hybrid_demo/_delete_by_query
 {"query": {"match_all": {}}}
 
 # Delete index entirely
-DELETE langflow
+DELETE hybrid_demo
 ```
 
 ---

@@ -21,7 +21,7 @@ This project demonstrates how to build a Retrieval-Augmented Generation (RAG) sy
 ```
 
 
-![Hybrid Search](data/demo_docs/hybridsearch.png)
+![Langflow](data/demo_docs/langflow.gif)
 
 Langflow provides a visual drag-and-drop interface for building RAG flows. Documents are parsed using Unstructured.io, stored in OpenSearch with vector embeddings, and retrieved to augment LLM responses.
 
@@ -222,6 +222,10 @@ Answer:
 ## Hybrid Search in Langflow
 
 Hybrid search combines keyword matching (BM25) with semantic understanding (vectors) for better results. This requires an additional component to extract keywords from the user's question.
+
+> **Note**: To effectively use hybrid search with field boosting on additional fields like `keywords` and `title`, ingest your documents using the `scripts/ingest_unstructured_opensearch.py` script. This script creates an optimized schema with custom analyzers and automatically extracts keywords for better BM25 ranking. The default Langflow ingestion only creates basic `text` and `vector_field` fields.
+
+![Hybrid Search](data/demo_docs/hybridsearch.png)
 
 ### Flow Architecture
 

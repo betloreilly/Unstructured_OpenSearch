@@ -194,7 +194,7 @@ def create_search_pipeline(client: OpenSearch, pipeline_name: str = "hybrid_sear
     try:
         # Check if pipeline exists
         client.transport.perform_request('GET', f'/_search/pipeline/{pipeline_name}')
-        print(f"✅ Search pipeline '{pipeline_name}' already exists")
+        print(f"[OK] Search pipeline '{pipeline_name}' already exists")
     except Exception:
         # Create the pipeline
         try:
@@ -203,9 +203,9 @@ def create_search_pipeline(client: OpenSearch, pipeline_name: str = "hybrid_sear
                 f'/_search/pipeline/{pipeline_name}',
                 body=SEARCH_PIPELINE
             )
-            print(f"✅ Created search pipeline '{pipeline_name}' for hybrid score normalization")
+            print(f"[OK] Created search pipeline '{pipeline_name}' for hybrid score normalization")
         except Exception as e:
-            print(f"⚠️  Could not create search pipeline: {e}")
+            print(f"[WARN] Could not create search pipeline: {e}")
             print("   (Hybrid search will still work, but without score normalization)")
 
 
@@ -213,14 +213,14 @@ def create_index(client: OpenSearch, index_name: str, recreate: bool = False):
     """Create OpenSearch index with hybrid search schema."""
     if client.indices.exists(index=index_name):
         if recreate:
-            print(f"🗑️  Deleting existing index '{index_name}'...")
+            print(f"[INFO] Deleting existing index '{index_name}'...")
             client.indices.delete(index=index_name)
         else:
-            print(f"✅ Index '{index_name}' already exists")
+            print(f"[OK] Index '{index_name}' already exists")
             return
     
     client.indices.create(index=index_name, body=INDEX_SCHEMA)
-    print(f"✅ Created index '{index_name}' with hybrid search schema")
+    print(f"[OK] Created index '{index_name}' with hybrid search schema")
     
     # Create search pipeline for hybrid search
     create_search_pipeline(client)
@@ -228,7 +228,7 @@ def create_index(client: OpenSearch, index_name: str, recreate: bool = False):
 
 def parse_with_unstructured(file_path: str) -> list[dict]:
     """Parse document using Unstructured.io API."""
-    print(f"📄 Parsing with Unstructured.io: {Path(file_path).name}")
+    print(f"[INFO] Parsing with Unstructured.io: {Path(file_path).name}")
     
     with open(file_path, "rb") as f:
         files = {"files": (Path(file_path).name, f)}
@@ -372,7 +372,7 @@ def extract_keywords_llm(text: str) -> list[str]:
         keywords = [k.strip().lower() for k in keywords_str.split(",")]
         return keywords[:10]
     except Exception as e:
-        print(f"   ⚠️  LLM keyword extraction failed: {e}, falling back to heuristic")
+        print(f"   [WARN] LLM keyword extraction failed: {e}, falling back to heuristic")
         return extract_keywords_heuristic(text)
 
 
@@ -397,7 +397,7 @@ def prepare_documents(elements: list[dict], filename: str) -> list[dict]:
         try:
             embedding = get_embedding(text)
         except Exception as e:
-            print(f"\n   ⚠️  Embedding failed for chunk {i+1}: {e}")
+            print(f"\n   [WARN] Embedding failed for chunk {i+1}: {e}")
             continue
         
         # Clean metadata
@@ -449,7 +449,7 @@ def prepare_documents(elements: list[dict], filename: str) -> list[dict]:
         }
         documents.append(doc)
     
-    print(f"\n   ✅ Prepared {len(documents)} documents with embeddings")
+    print(f"\n   [OK] Prepared {len(documents)} documents with embeddings")
     return documents
 
 
@@ -458,25 +458,25 @@ def ingest_file(client: OpenSearch, file_path: str):
     path = Path(file_path)
     
     if not path.exists():
-        print(f"❌ File not found: {file_path}")
+        print(f"[ERROR] File not found: {file_path}")
         return 0
     
     # Parse with Unstructured.io
     elements = parse_with_unstructured(file_path)
     
     if not elements:
-        print(f"   ⚠️  No elements extracted from {path.name}")
+        print(f"   [WARN] No elements extracted from {path.name}")
         return 0
     
     # Prepare documents with embeddings
     documents = prepare_documents(elements, path.name)
     
     if not documents:
-        print(f"   ⚠️  No valid documents to index")
+        print(f"   [WARN] No valid documents to index")
         return 0
     
     # Index documents one by one for better error visibility
-    print(f"   📥 Indexing {len(documents)} documents...")
+    print(f"   [INFO] Indexing {len(documents)} documents...")
     success_count = 0
     error_count = 0
     
@@ -491,7 +491,7 @@ def ingest_file(client: OpenSearch, file_path: str):
         except Exception as e:
             error_count += 1
             if error_count <= 3:
-                print(f"   ⚠️  Index error: {e}")
+                print(f"   [WARN] Index error: {e}")
     
     # Force refresh to make documents searchable immediately
     try:
@@ -499,7 +499,7 @@ def ingest_file(client: OpenSearch, file_path: str):
     except Exception:
         pass
     
-    print(f"   ✅ Indexed {success_count} documents ({error_count} errors)")
+    print(f"   [OK] Indexed {success_count} documents ({error_count} errors)")
     return success_count
 
 
@@ -511,10 +511,10 @@ def ingest_directory(client: OpenSearch, dir_path: str):
     files = [f for f in path.iterdir() if f.suffix.lower() in supported_extensions]
     
     if not files:
-        print(f"❌ No supported files found in {dir_path}")
+        print(f"[ERROR] No supported files found in {dir_path}")
         return
     
-    print(f"📁 Found {len(files)} files to process")
+    print(f"[INFO] Found {len(files)} files to process")
     
     total_indexed = 0
     for file_path in files:
@@ -522,10 +522,10 @@ def ingest_directory(client: OpenSearch, dir_path: str):
             indexed = ingest_file(client, str(file_path))
             total_indexed += indexed
         except Exception as e:
-            print(f"❌ Error processing {file_path.name}: {e}")
+            print(f"[ERROR] Error processing {file_path.name}: {e}")
     
     print(f"\n{'='*50}")
-    print(f"✅ Total indexed: {total_indexed} documents")
+    print(f"[OK] Total indexed: {total_indexed} documents")
 
 
 def main():
@@ -543,12 +543,12 @@ def main():
     
     # Validate API keys
     if UNSTRUCTURED_API_KEY == "YOUR_UNSTRUCTURED_API_KEY":
-        print("❌ Please set UNSTRUCTURED_API_KEY environment variable")
+        print("[ERROR] Please set UNSTRUCTURED_API_KEY environment variable")
         print("   export UNSTRUCTURED_API_KEY='your-key-here'")
         return
     
     if not OPENAI_API_KEY:
-        print("❌ Please set OPENAI_API_KEY environment variable")
+        print("[ERROR] Please set OPENAI_API_KEY environment variable")
         print("   export OPENAI_API_KEY='your-key-here'")
         return
     
@@ -556,7 +556,7 @@ def main():
     USE_LLM_KEYWORDS = args.llm_keywords
     
     print("="*50)
-    print("📦 OpenSearch Hybrid Search Ingestion")
+    print("OpenSearch Hybrid Search Ingestion")
     print("="*50)
     print(f"Index: {INDEX_NAME}")
     print(f"Unstructured API: {UNSTRUCTURED_API_URL}")
@@ -569,9 +569,9 @@ def main():
     
     try:
         info = client.info()
-        print(f"✅ Connected to OpenSearch {info['version']['number']}")
+        print(f"[OK] Connected to OpenSearch {info['version']['number']}")
     except Exception as e:
-        print(f"❌ Failed to connect to OpenSearch: {e}")
+        print(f"[ERROR] Failed to connect to OpenSearch: {e}")
         return
     
     # Create index
@@ -588,7 +588,7 @@ def main():
         if demo_dir.exists():
             ingest_directory(client, str(demo_dir))
         else:
-            print("❌ No input specified. Use --file or --dir")
+            print("[ERROR] No input specified. Use --file or --dir")
             print(f"   Or create demo docs: python scripts/download_demo_pdfs.py")
     
     # Show final count
@@ -596,7 +596,7 @@ def main():
         count = client.count(index=INDEX_NAME)["count"]
     except Exception:
         count = "unknown"
-    print(f"\n📊 Total documents in '{INDEX_NAME}': {count}")
+    print(f"\n[DONE] Total documents in '{INDEX_NAME}': {count}")
 
 
 if __name__ == "__main__":

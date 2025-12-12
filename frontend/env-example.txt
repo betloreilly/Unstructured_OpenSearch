@@ -1,0 +1,19 @@
+# ===========================================
+# RAG Analytics UI - Environment Variables
+# ===========================================
+# Copy this file to .env.local and fill in your values
+
+# OpenAI API Key (required for LLM quality analysis)
+OPENAI_API_KEY=your-openai-api-key-here
+
+# Langflow Configuration
+LANGFLOW_URL=http://localhost:7860
+LANGFLOW_FLOW_ID=346acaa3-2e85-4478-8ed1-16929cdfde0a
+# Get API key from Langflow UI: Settings > API Keys
+# Or run Langflow with LANGFLOW_SKIP_AUTH_AUTO_LOGIN=true to skip auth
+LANGFLOW_API_KEY=
+
+# OpenSearch Configuration
+OPENSEARCH_URL=http://localhost:9200
+OPENSEARCH_DASHBOARDS_URL=http://localhost:5601
+

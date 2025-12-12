@@ -2,28 +2,14 @@
 
 This project demonstrates how to build a Retrieval-Augmented Generation (RAG) system using Langflow's visual interface with OpenSearch as the vector store. It includes a Python ingestion script that uses Unstructured.io to parse documents and create proper schema for hybrid search.
 
-## Architecture
+## Reference Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         LANGFLOW                                 │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      │
-│  │ Unstructured │ -> │  OpenSearch  │ -> │    LLM       │      │
-│  │   Loader     │    │ Vector Store │    │ (watsonx/    │      │
-│  │              │    │              │    │  OpenAI)     │      │
-│  └──────────────┘    └──────────────┘    └──────────────┘      │
-└─────────────────────────────────────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Docker (OpenSearch)                          │
-└─────────────────────────────────────────────────────────────────┘
-```
+![Architecture](/data/OpensearchRAG.png)
+ 
+Langflow provides a visual drag-and-drop interface for building RAG flows. Documents are parsed using Unstructured.io, stored in OpenSearch with vector embeddings, and retrieved to augment LLM responses.
 
 
 ![Langflow](data/demo_docs/langflow.gif)
-
-Langflow provides a visual drag-and-drop interface for building RAG flows. Documents are parsed using Unstructured.io, stored in OpenSearch with vector embeddings, and retrieved to augment LLM responses.
 
 ## Prerequisites
 
@@ -312,20 +298,34 @@ The double braces `{{` and `}}` are required because Langflow uses single braces
 
 ---
 
-## Project Structure
+## RAG Analytics UI
 
+A Next.js web interface is available in the `frontend/` directory that provides:
+
+- **Chat Interface**: Beautiful UI to interact with your RAG system
+- **Automatic Logging**: Every Q&A is logged to OpenSearch with metadata
+- **LLM Quality Analysis**: Automatic quality scoring and categorization
+- **Analytics Dashboard**: View metrics, find questions needing improvement
+
+### Quick Start
+
+```bash
+cd frontend
+npm install
+cp env-example.txt .env.local
+# Edit .env.local with your OPENAI_API_KEY and LANGFLOW_FLOW_ID
+
+npm run setup-opensearch  # Creates indices and dashboards
+npm run dev               # Start the UI at http://localhost:3000
 ```
-Unstructured_OpenSearch/
-├── docker-compose.yml              # OpenSearch containers
-├── requirements.txt                # Python dependencies
-├── README.md                       # This file
-├── env-example.txt                 # Environment variable template
-├── RAG with Opensearch.json        # Pre-built Langflow flow (import this)
-├── .gitignore
-├── data/                           # Place your documents here
-└── scripts/
-    └── ingest_unstructured_opensearch.py  # Document ingestion script
-```
+
+### Data Logged
+
+Each interaction logs: question, answer, timestamp, latency, quality score (0-1), quality label (good/fair/poor), category, question type, and improvement suggestions.
+
+View detailed analytics at http://localhost:5601 (OpenSearch Dashboards).
+
+See `frontend/README.md` for full documentation.
 
 ---
 
@@ -333,9 +333,10 @@ Unstructured_OpenSearch/
 
 | Service | URL | Purpose |
 |---------|-----|---------|
+| **RAG Analytics UI** | http://localhost:3000 | Chat interface with analytics |
 | Langflow | http://localhost:7860 | Visual flow builder |
 | OpenSearch | http://localhost:9200 | Vector store API |
-| OpenSearch Dashboards | http://localhost:5601 | Data exploration |
+| OpenSearch Dashboards | http://localhost:5601 | Data exploration & RAG analytics |
 
 ---
 
@@ -481,3 +482,14 @@ For hybrid search, use a fast LLM like gpt-4o-mini for keyword extraction since 
 - [OpenSearch Hybrid Search](https://opensearch.org/docs/latest/search-plugins/hybrid-search/)
 - [Unstructured.io Documentation](https://docs.unstructured.io/)
 - [watsonx.ai Documentation](https://www.ibm.com/docs/en/watsonx-as-a-service)
+
+---
+
+## Next Steps
+
+Once you have the basic RAG pipeline running, continue with these guides:
+
+| Step | Guide | Description |
+|------|-------|-------------|
+| 1 | [OpenSearch Dashboards Guide](docs/OpenSearch-Dashboards-Guide.md) | Learn how to create visualizations and dashboards to monitor your RAG system |
+| 2 | [RAG Analytics Guide](docs/RAG-Analytics-Architecture.md) | Understand the full architecture and how quality analysis works |
